@@ -11,16 +11,15 @@ class Component(EObject):
     """Component class identifies a component.
     """
 
-    def __init__(self, the_engine, the_name):
+    def __init__(self, the_engine, the_name, **kwargs):
         """__init__ initializes the Component instance.
         """
-        super().__init__(the_engine, the_name)
+        super().__init__(the_engine, the_name, **kwargs)
         Log.Component(self.name).New().call()
-        self.entity = None
-        self.delegate = None
+        self.entity = kwargs.get("entity", None)
+        self.delegate = kwargs.get("delegate", None)
         self.callbacks = []
-        self.remove_on_destroy = True
-        self.cache = {}
+        self.remove_on_destroy = kwargs.get("remove_on_destroy", True)
 
     def add_delegate_to_callback(self, the_delegate, the_entity, the_component, the_signature):
         """add_delegate_to_callback adds a new delegate that component should callback.
@@ -35,14 +34,21 @@ class Component(EObject):
         for the component.
         """
         pass
-
-    def get_cache(self, the_key):
-        """get_cache retrieves component data cache for the given key.
+    
+    @property
+    def klass(self):
+        """klass returns component class name.
         """
-        return self.cache.get(the_key, None)
+        return type(self).__name__
+
+    def on_active(self):
+        """on_active is called every time the component is set to active.
+        """
+        Log.Component(self.name).OnActive().call()
+        self.active = True
 
     def on_collision_callback(self, **kwargs):
-        """on_collision_callback is the component default callback when 
+        """on_collision_callback is the component default callback when
         on_collision delegate is triggered.
         """
         return True
@@ -71,11 +77,6 @@ class Component(EObject):
         """on_dump dumps component to JSON format.
         """
         pass
-
-    def on_enable(self):
-        """on_enable is called every time the component is enabled.
-        """
-        Log.Component(self.name).OnEnable().call()
 
     def on_frame_end(self):
         """on_frame_end calls all methods to run at the end of a tick frame.
@@ -154,8 +155,3 @@ class Component(EObject):
         component too.
         """
         pass
-
-    def set_cache(self, the_key, the_value):
-        """set_cache sets a new cache entry for the given key and value.
-        """
-        self.cache[the_key] = the_value

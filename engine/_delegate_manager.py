@@ -1,9 +1,9 @@
 """_delegate_manager.py contains all logic delegate logic.
 """
 
-from ._loggar import Log
-from ._iobject import IObject
 from ._eobject import EObject
+from ._iobject import IObject
+from ._loggar import Log
 
 
 class Delegate(IObject):
@@ -43,10 +43,10 @@ class DelegateManager(EObject):
     ON_DESTROY_EVENT_NAME = "on-destroy-event"
     ON_LOAD_EVENT_NAME = "on-load_event"
 
-    def __init__(self, the_engine, the_name):
+    def __init__(self, the_name, the_engine=None):
         """__init__ initializes a DelegateManager instance.
         """
-        super().__init__(the_engine, the_name)
+        super().__init__(the_name, the_engine)
         self.delegates = {}     # [delegate_id]delegate
         self.callbacks = {}     # [delegate_id]list(callback)
         self.defaults = {}
@@ -105,7 +105,7 @@ class DelegateManager(EObject):
     def on_init(self):
         """on_init initializes all DelegateManager resources.
         """
-        Log.DelegateManager(self.name).OnInit().call()
+        super().on_init()
         self.defaults[self.ON_COLLISION_EVENT_NAME] = self.create_delegate(self, self.ON_COLLISION_EVENT_NAME)
         self.defaults[self.ON_DESTROY_EVENT_NAME] = self.create_delegate(self, self.ON_DESTROY_EVENT_NAME)
         self.defaults[self.ON_LOAD_EVENT_NAME] = self.create_delegate(self, self.ON_LOAD_EVENT_NAME)
@@ -117,16 +117,16 @@ class DelegateManager(EObject):
         """
         return self.defaults.get(self.ON_LOAD_EVENT_NAME, None)
 
-    def on_start(self):
-        """on_start initializes all DelegateManager resources.
-        """
-        Log.DelegateManager(self.name).OnStart().call()
+    # def on_start(self):
+    #     """on_start initializes all DelegateManager resources.
+    #     """
 
     def on_update(self):
         """on_update is called after all other on_update methods have been
         called for all entities, components and resources in the scene. It will
         execute all callbacks still pending.
         """
+        super().on_update()
         for a_callback in self.to_be_called:
             a_callback.signature(**a_callback.kwargs)
 
@@ -156,7 +156,7 @@ class DelegateManager(EObject):
         for a_callback in self.callbacks.get(the_delegate_id, []):
             # Check if the entity for the component in the callback belongs to
             # the active scene.
-            if not get_scene_manager().is_active_scene(a_callback.component.entity.scene.id):
+            if not self.get_scene_manager().is_active_scene(a_callback.component.entity.scene.id):
                 continue
             if a_callback.component.entity not in the_entities:
                 continue
@@ -173,4 +173,3 @@ class DelegateManager(EObject):
             a_store_callback.kwargs = kwargs
             self.to_be_called.append(a_store_callback)
             return
-
