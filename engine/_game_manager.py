@@ -15,6 +15,7 @@ class GameManager(EObject):
 
         Args:
             the_name (str): String with the GameManager name.
+            the_engine (Engine): Engine instance.
         """
         super().__init__(the_name, the_engine)
 

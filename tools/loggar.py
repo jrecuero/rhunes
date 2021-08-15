@@ -1,10 +1,9 @@
-from typing import List
-import logging
-import json
 import datetime
-import sys
 import inspect
-
+import json
+import logging
+import sys
+from typing import List
 
 NONE = "none"
 DEBUG = "debug"
@@ -73,7 +72,7 @@ class _Logging(logging.Logger):
             if len(args) == 0:
                 self.dicta[attr] = ""
             elif isinstance(args[0], dict):
-                self.dicta[attr] = args
+                self.dicta[attr] = args[0]
             else:
                 self.dicta[attr] = "{}".format(args[0])
             return self

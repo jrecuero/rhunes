@@ -19,9 +19,9 @@ class IObject:
         self.name = the_name
         self.loaded = kwargs.get("loaded", False)
         self.started = kwargs.get("started", False)
-        self.active = kwargs.get("active", False)
         self.tag = kwargs.get("tag", None)
         self.dirty = kwargs.get("dirty", False)
+        self.active = kwargs.get("active", True)
         self.visible = kwargs.get("visible", True)
 
     @staticmethod

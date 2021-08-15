@@ -13,7 +13,7 @@ class EObject(IObject):
         """__init__ initializes an EObject instance.
         """
         super().__init__(the_name, **kwargs)
-        Log.EObject(the_name).New().call()
+        Log.__getattr__(type(self).__name__)(self.name).New().call()
         self.engine = the_engine
         self.state = "created"
         self.cache = {}
@@ -68,81 +68,125 @@ class EObject(IObject):
         """
         self.cache[the_key] = the_value
 
+    def on_active(self):
+        """on_active calls all on_active methods.
+        """
+        self.active = True
+        self.state = "on-active"
+        Log.__getattr__(type(self).__name__)(self.name).OnActive(self.state).call()
+
     def on_after_update(self):
         """on_after_update calls all on_after_update methods.
         """
         self.state = "on-after-update"
-        Log.EObject(self.name).OnAfterUpdate(self.state).call()
+        # Log.__getattr__(type(self).__name__)(self.name).OnAfterUpdate(self.state).call()
 
     def on_create(self):
         """on_create calls all on_create methods.
         """
         self.state = "on-create"
-        Log.EObject(self.name).OnCreate(self.state).call()
+        Log.__getattr__(type(self).__name__)(self.name).OnCreate(self.state).call()
 
     def on_cleanup(self):
         """on_cleanup calls all on_cleanup methods.
         """
         self.state = "on-cleanup"
-        Log.EObject(self.name).OnCleanUp(self.state).call()
+        Log.__getattr__(type(self).__name__)(self.name).OnCleanUp(self.state).call()
+
+    def on_destroy(self):
+        """on_destroy calls all on_destroy methods
+        """
+        self.state = "on-destroy"
+        Log.__getattr__(type(self).__name__)(self.name).OnDestroy(self.state).call()
+
+    def on_dump(self):
+        """on_dump dumps all scene entites in JSON format.
+        """
+        self.state = "on-dump"
+        Log.__getattr__(type(self).__name__)(self.name).OnDump(self.state).call()
 
     def on_end(self):
         """on_end ends instanve.
         """
         self.state = "on-end"
-        Log.EObject(self.name).OnEnd(self.state).call()
+        Log.__getattr__(type(self).__name__)(self.name).OnEnd(self.state).call()
 
     def on_frame_end(self):
         """on_frame_end calls all methods to run at the end of a tick frame.
         """
         self.state = "on-frame-end"
-        Log.EObject(self.name).OnFrameEnd(self.state).call()
+        # Log.__getattr__(type(self).__name__)(self.name).OnFrameEnd(self.state).call()
 
     def on_frame_start(self):
         """on_frame_start calls all methods to run at the start of a tick frame.
         """
         self.state = "on-frame-start"
-        Log.EObject(self.name).OnFrameStart(self.state).call()
+        # Log.__getattr__(type(self).__name__)(self.name).OnFrameStart(self.state).call()
 
     def on_graphical_cleanup(self):
         """on_graphical_cleanup cleans up all graphical resources.
         """
         self.state = "on-graphical-cleanup"
-        Log.EObject(self.name).OnGraphicalCleanUp(self.state).call()
+        Log.__getattr__(type(self).__name__)(self.name).OnGraphicalCleanUp(self.state).call()
 
     def on_graphical_init(self):
         """on_graphical_init initialized all graphical resources.
         """
         self.state = "on-graphical-init"
-        Log.EObject(self.name).OnGraphicalInit(self.state).call()
+        Log.__getattr__(type(self).__name__)(self.name).OnGraphicalInit(self.state).call()
 
     def on_init(self):
         """on_init initalizes all engine graphical and none graphical
         resources.
         """
         self.state = "on-init"
-        Log.EObject(self.name).OnInit(self.state).call()
+        Log.__getattr__(type(self).__name__)(self.name).OnInit(self.state).call()
+
+    def on_load(self):
+        """on_load is called all on_load methods.
+        """
+        self.loaded = True
+        self.state = "on-load"
+        Log.__getattr__(type(self).__name__)(self.name).OnLoad(self.state).call()
 
     def on_run(self):
         """on_run proceeds to run the engine.
         """
         self.state = "on-run"
-        Log.EObjet(self.name).OnRun(self.state).call()
+        Log.__getattr__(type(self).__name__)(self.name).OnRun(self.state).call()
 
     def on_render(self):
         """on_render calls all on_render methods.
         """
         self.state = "on-render"
-        Log.EObject(self.name).OnRender(self.state).call()
+        # Log.__getattr__(type(self).__name__)(self.name).OnRender(self.state).call()
 
     def on_start(self):
         """on_start calls start methods.
         """
         self.state = "on-start"
-        Log.EObject(self.name).OnStart(self.state).call()
+        Log.__getattr__(type(self).__name__)(self.name).OnStart(self.state).call()
+
+    def on_swap_back(self):
+        """on_swap_back calls all on_swap_back methods.
+        """
+        self.state = "on-swap-back"
+        Log.__getattr__(type(self).__name__)(self.name).OnSwapBack(self.state).call()
+
+    def on_swap_from(self):
+        """on_swap_from calls all on_swap_from methods.
+        """
+        self.state = "on-swap-from"
+        Log.__getattr__(type(self).__name__)(self.name).OnSwapFrom(self.state).call()
+
+    def on_unload(self):
+        """on_unload is called all on_unload methods.
+        """
+        self.state = "on-unload"
+        Log.__getattr__(type(self).__name__)(self.name).OnUnlooad(self.state).call()
 
     def on_update(self):
         """on_update calls all on_update methods.
         """
         self.state = "on-update"
-        Log.EObject(self.name).OnUpdate(self.state).call()
+        # Log.__getattr__(type(self).__name__)(self.name).OnUpdate(self.state).call()

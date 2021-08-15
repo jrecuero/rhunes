@@ -1,19 +1,18 @@
 """_entity.py contains the Entity base class, used for any entity in the game.
 """
 
-from ._loggar import Log
 from ._eobject import EObject
+from ._loggar import Log
 
 
 class Entity(EObject):
     """Entity class identifies an entity.
     """
 
-    def __init__(self, the_engine, the_name, **kwargs):
+    def __init__(self, the_name, the_engine=None, **kwargs):
         """__init__ initializes the Entity instance.
         """
-        super().__init__(the_engine, the_name, **kwargs)
-        Log.Entity(self.name).New().call()
+        super().__init__(the_name, the_engine, **kwargs)
         self.layer = kwargs.get("layer", "middle")
         self.parent = kwargs.get("parent", None)
         self.children = list()
@@ -43,6 +42,7 @@ class Entity(EObject):
                 Log.Entity(self.name).Error("component type {} already exists".format(the_component.klass))
                 raise Exception("component type {} already exists".format(the_component.klass))
         the_component.entity = self
+        the_component.engine = self.engine
         self.components.append(the_component)
         self.unloaded_components.append(the_component)
         return self
@@ -89,6 +89,7 @@ class Entity(EObject):
     def load_unloaded_components(self):
         """load_unloaded_components proceeds to load any unloaded component.
         """
+        # Log.Entity(self.name).LoadUnloadedComoponents().call()
         a_unloaded_components = list()
         for a_component in self.unloaded_components:
             if not a_component.active:
@@ -99,67 +100,69 @@ class Entity(EObject):
         self.unloaded_components = a_unloaded_components
         return True
 
-    def on_active(self):
-        """on_active is called every time the entity is set active.
-        """
-        Log.Entity(self.name).OnActive().call()
-        self.active = True
-
     def on_destroy(self):
         """on_destroy calls all methods to clean up the entity.
         """
-        Log.Entity(self.name).OnDestroy().call()
+        super().on_destroy()
         for a_component in self.components:
             a_component.on_destroy()
         self.components = list()
         self.loaded_components = list()
         self.unloaded_components = list()
 
-    def on_dump(self):
-        """on_dump dumps entity to JSON format.
+    # def on_dump(self):
+    #     """on_dump dumps entity to JSON format.
+    #     """
+    #     super().on_dump()
+
+    def on_end(self):
+        """on_end calls all on_end methods for components in the entity.
         """
-        Log.Entity(self.name).OnDump().call()
+        super().on_end()
+        for a_component in [x for x in self.loaded_components if x.active]:
+            a_component.on_end()
 
     def on_frame_end(self):
         """on_frame_end calls all methods to run at the end of a tick frame.
         """
-        pass
-
-    def on_frame_start(self):
-        """on_frame_start calls all methods to run at the start of a tick
-        frame.
-        """
-        pass
-
-    def on_load(self):
-        """on_load is called when entity is loaded by the scene.
-        """
-        Log.Entity(self.name).OnLoad().call()
-        self.loaded = True
+        super().on_frame_end()
         self.load_unloaded_components()
+        for a_component in [x for x in self.loaded_components if x.active]:
+            a_component.on_frame_start()
+
+    # def on_frame_start(self):
+    #     """on_frame_start calls all methods to run at the start of a tick
+    #     frame.
+    #     """
+    #     super().on_frame_start()
+
+    # def on_load(self):
+    #     """on_load is called when entity is loaded by the scene.
+    #     """
+    #     super().on_load()
 
     def on_render(self):
         """on_render is called every time the entity is called to be rendered.
         """
-        if self.visible:
-            for a_component in self.components:
-                if a_component.active:
-                    a_component.on_render()
+        super().on_render()
+        if not self.visible:
+            return
+        for a_component in [x for x in self.loaded_components if x.active]:
+            a_component.on_render()
 
     def on_start(self):
         """on_start is called the first time the entity starts.
         """
-        Log.Entity(self.name).OnStart().call()
-        for a_component in self.components:
-            if a_component.active:
-                a_component.on_start()
+        super().on_start()
+        for a_component in [x for x in self.loaded_components if x.active]:
+            a_component.on_start()
 
     def on_update(self):
         """on_update is called every time the entity is called to be updated.
         """
-        for a_component in self.components:
-            if a_component.active:
-                a_component.on_update()
+        super().on_update()
+        for a_component in [x for x in self.loaded_components if x.active]:
+            a_component.on_update()
 
     def remove_child(self, the_child):
         """remove_child removes child from all entity attributes.
@@ -187,6 +190,8 @@ class Entity(EObject):
         Log.Entity(self.name).RemoveComponents().call()
         for a_component in self.components:
             a_component.on_unload()
+            a_component.entity = None
+            a_component.engine = None
         self.components = list()
         self.loaded_components = list()
         self.unloaded_components = list()

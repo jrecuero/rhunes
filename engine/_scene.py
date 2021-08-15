@@ -1,19 +1,19 @@
 """_scene.py contais the Scene base class, used for any scene in the game.
 """
 
-from ._loggar import Log
 from ._eobject import EObject
+from ._loggar import Log
 
 
 class Scene(EObject):
     """Scene class identifies a scene.
     """
+    LAYERS = ["background", "middle", "top"]
 
-    def __init__(self, the_engine, the_name, **kwargs):
+    def __init__(self, the_name, the_engine=None, **kwargs):
         """__init__ initialized the Scene instance.
         """
-        super().__init__(the_engine, the_name)
-        Log.Scene(self.name).New().call()
+        super().__init__(the_name, the_engine)
         self.entities = list()
         self.to_delete_entities = list()
         self.loaded_entities = list()
@@ -33,6 +33,7 @@ class Scene(EObject):
         Log.Scene(self.name).AddEntity(the_entity.name).call()
         self.entities.append(the_entity)
         self.unloaded_entities.append(the_entity)
+        the_entity.engine = self.engine
         the_entity.scene = self
         for a_entity_child in the_entity.children:
             self.add_entity(a_entity_child)
@@ -42,7 +43,6 @@ class Scene(EObject):
         """check_collisions checks collisions between all entities in the
         scene.
         """
-        pass
 
     def load_unloaded_entities(self):
         """load_unloaded_entities proceeds to load any unloaded entity.
@@ -68,6 +68,7 @@ class Scene(EObject):
     def on_active(self):
         """on_active calls all loaded entities on_active methods.
         """
+        super().on_active()
         for a_entity in self.loaded_entities:
             a_entity.on_active()
 
@@ -75,6 +76,7 @@ class Scene(EObject):
         """on_after_update executes after all on_update calls have been
         executed and before on_render.
         """
+        super().on_after_update()
         for a_entity in self.to_delete_entities:
             self.entities.remove(a_entity)
             if a_entity in self.loaded_entities:
@@ -89,6 +91,7 @@ class Scene(EObject):
     def on_destroy(self):
         """on_destroy calls all methods to clean up the scene.
         """
+        super().on_destroy()
         Log.Scene(self.name).OnDestroy().call()
         self.loaded = False
         for a_entity in self.entities:
@@ -100,56 +103,73 @@ class Scene(EObject):
         self.collision_collection = list()
         self.layers = dict()
 
-    def on_dump(self):
-        """on_dump dumps all scene entites in JSON format.
+    # def on_dump(self):
+    #     """on_dump dumps all scene entites in JSON format.
+    #     """
+    #     super().on_dump()
+
+    def on_end(self):
+        """on_end calls all on_end methods for entities in the scene.
         """
-        Log.Scene(self.name).OnDump().call()
+        super().on_end()
+        for a_entity in self.loaded_entities:
+            a_entity.on_end()
 
     def on_frame_end(self):
         """on_frame_end calls all methods to run at the end of tick frame.
         """
-        for a_entity in self.entities:
+        super().on_frame_end()
+        for a_entity in self.loaded_entities:
             a_entity.on_frame_end()
 
     def on_frame_start(self):
         """on_frame_start calls all methods to run at the start of tick frame.
         """
+        super().on_frame_start()
         self.load_unloaded_entities()
         for a_entity in self.entities:
-            a_entity.on_frame_start
+            a_entity.on_frame_start()
+
+    def on_init(self):
+        """on_init initalizes all scene resources.
+        resources.
+        """
+        for a_layer in Scene.LAYERS:
+            self.layers[a_layer] = list()
 
     def on_load(self):
         """on_load is called when scene is loaded by the engine.
         """
-        Log.Scene(self.name).OnLoad().call()
-        self.loaded = True
+        super().on_load()
         self.load_unloaded_entities()
 
     def on_render(self):
         """on_render calls all loaded entities on_render methods. It call
         entities using layers, calling from backgroud to top layer.
         """
-        for _, a_entities_in_layer in self.layers:
+        super().on_render()
+        for _, a_entities_in_layer in self.layers.items():
             for a_entity in a_entities_in_layer:
                 a_entity.on_render()
 
     def on_start(self):
         """on_start calls all loaded entities on_start methods.
         """
+        super().on_start()
         for a_entity in self.loaded_entities:
             a_entity.on_start()
 
     def on_swap_back(self):
         """on_swap_back is called when scene is swap back.
         """
-        Log.Scene(self.name).OnSwapBack().call()
+        super().on_swap_back()
         self.load_unloaded_entities()
 
     def on_swap_from(self):
         """on_swap_from is called when scene is swap from, but it is not
         unloaded.
         """
-        Log.Scene(self.name).OnSwapFrom().call()
+        super().on_swap_from()
         for a_entity in self.loaded_entities:
             a_entity.on_unload()
         self.loaded_entities = list()
@@ -161,7 +181,7 @@ class Scene(EObject):
     def on_unload(self):
         """on_unload is called when scene is unloaded from the scene manager.
         """
-        Log.Scene(self.name).OnUnload().call()
+        super().on_unload()
         self.loaded = False
         for a_entity in self.loaded_entities:
             a_entity.on_unload()
@@ -175,6 +195,7 @@ class Scene(EObject):
     def on_update(self):
         """on_update calls all loaded entities on_update methods.
         """
+        super().on_update()
         for a_entity in self.loaded_entities:
             a_entity.on_update()
 
@@ -193,5 +214,7 @@ class Scene(EObject):
 
         for a_entity_child in the_entity.children:
             self.remove_entity(a_entity_child)
-        return True
 
+        a_entity.scene = None
+        a_entity.engine = None
+        return True

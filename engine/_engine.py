@@ -45,6 +45,7 @@ class Engine:
         self.active = False
         self.managers = {
             "cursor-manager": kwargs.get("the_cursor_manager", None),
+            "debug-manager": kwargs.get("the_debug_manager", None),
             "delegate-manager": kwargs.get("the_delegate_manager", None),
             "event-manager": kwargs.get("the_event_manager", None),
             "font-manager": kwargs.get("the_font_manager", None),
@@ -75,6 +76,20 @@ class Engine:
         if the_manager.engine is None:
             the_manager.engine = self
         self.managers["cursor-manager"] = the_manager
+
+    @property
+    def debug_manager(self):
+        """debug_manager returns Engine debugManager instance.
+        """
+        return self.managers["debug-manager"]
+
+    @debug_manager.setter
+    def debug_manager(self, the_manager):
+        """debug_manager setter sets Engine debugManage instance.
+        """
+        if the_manager.engine is None:
+            the_manager.engine = self
+        self.managers["debug-manager"] = the_manager
 
     @property
     def delegate_manager(self):
@@ -208,7 +223,7 @@ class Engine:
         """on_after_update calls all on_after_update methods for every manager.
         """
         self.state = "on-after-update"
-        Log.Engine(self.name).OnAfterUpdate(self.state).call()
+        # Log.Engine(self.name).OnAfterUpdate(self.state).call()
         for a_manager in self.active_managers:
             a_manager.on_after_update()
 
@@ -241,7 +256,7 @@ class Engine:
         """on_frame_end calls all methods to run at the end of a tick frame.
         """
         self.state = "on-frame-end"
-        Log.Engine(self.name).OnFrameEnd(self.state).call()
+        # Log.Engine(self.name).OnFrameEnd(self.state).call()
         for a_manager in self.active_managers:
             a_manager.on_frame_end()
 
@@ -249,7 +264,7 @@ class Engine:
         """on_frame_start calls all methods to run at the start of a tick frame.
         """
         self.state = "on-frame-start"
-        Log.Engine(self.name).OnFrameStart(self.state).call()
+        # Log.Engine(self.name).OnFrameStart(self.state).call()
         self.frames += 1
         for a_manager in self.active_managers:
             a_manager.on_frame_start()
@@ -301,43 +316,34 @@ class Engine:
         """on_render calls all on_render methods for every manager.
         """
         self.state = "on-render"
-        Log.Engine(self.name).OnRender(self.state).call()
+        # Log.Engine(self.name).OnRender(self.state).call()
         for a_manager in self.active_managers:
             a_manager.on_render()
 
-    def on_start(self, the_scene):
+    def on_start(self):
         """on_start starts the engine. At this point all scenes and entities
         have been already registered to the engine.
-
-        Args:
-            the_scene (Scene): Initial scene instance to start the engine.
         """
         self.state = "on-start"
         Log.Engine(self.name).OnStart(self.state).call()
         self.active = True
         for a_manager in self.active_managers:
             a_manager.on_start()
-        # set the given scene as the active scene.
-        if self.scene_manager:
-            self.scene_manager.set_active_scene(the_scene)
 
     def on_update(self):
         """on_update calls all on_update methods for every manager.
         """
         self.state = "on-update"
-        Log.Engine(self.name).OnUpdate(self.state).call()
+        # Log.Engine(self.name).OnUpdate(self.state).call()
         for a_manager in self.active_managers:
             a_manager.on_update()
 
-    def run(self, the_scene):
+    def run(self):
         """run runs the engine and launches the give scene as the initial one.
-
-        Args:
-            the_scene (Scene): Initial scene instance to start the engine.
         """
         self.on_init()
         self.on_create()
-        self.on_start(the_scene)
+        self.on_start()
         self.on_run()
         self.on_cleanup()
         self.on_end()
