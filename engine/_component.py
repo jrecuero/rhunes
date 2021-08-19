@@ -92,6 +92,7 @@ class Component(EObject):
         """on_load is called when component is loaded by the entity.
         """
         super().on_load()
+        self.engine = self.entity.engine
         return self.loaded
 
     def on_load_callback(self, **kwargs):
@@ -144,7 +145,7 @@ class Component(EObject):
         self.started = False
 
     # def on_update(self):
-    #     """on_updaate is called every time component is updated.
+    #     """on_update is called every time component is updated.
     #     """
     #     super().on_update()
 

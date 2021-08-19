@@ -38,7 +38,7 @@ class App(Flask):
     def api_exit(self):
         """api_exit exits the engine.
         """
-        self.engine.active = False
+        self.engine.on_exit()
         return jsonify("exiting engine...")
 
     def api_kill(self):

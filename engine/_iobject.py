@@ -57,7 +57,7 @@ class IObject:
 
     @staticmethod
     def lookup_by_name(the_iter, the_name):
-        """lookup_by_name returns an entry up in the given iteratble for the
+        """lookup_by_name returns an entry up in the given iterable for the
         given name.
         """
         for a_traverse in the_iter:

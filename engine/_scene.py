@@ -104,7 +104,7 @@ class Scene(EObject):
         self.layers = dict()
 
     # def on_dump(self):
-    #     """on_dump dumps all scene entites in JSON format.
+    #     """on_dump dumps all scene entities in JSON format.
     #     """
     #     super().on_dump()
 
@@ -127,11 +127,11 @@ class Scene(EObject):
         """
         super().on_frame_start()
         self.load_unloaded_entities()
-        for a_entity in self.entities:
+        for a_entity in self.loaded_entities:
             a_entity.on_frame_start()
 
     def on_init(self):
-        """on_init initalizes all scene resources.
+        """on_init initializes all scene resources.
         resources.
         """
         for a_layer in Scene.LAYERS:
@@ -141,11 +141,11 @@ class Scene(EObject):
         """on_load is called when scene is loaded by the engine.
         """
         super().on_load()
-        self.load_unloaded_entities()
+        # self.load_unloaded_entities()
 
     def on_render(self):
         """on_render calls all loaded entities on_render methods. It call
-        entities using layers, calling from backgroud to top layer.
+        entities using layers, calling from background to top layer.
         """
         super().on_render()
         for _, a_entities_in_layer in self.layers.items():

@@ -40,7 +40,7 @@ class GameManager(EObject):
     #     """
 
     # def on_init(self):
-    #     """on_init initalizes all GameManager assets and resources.
+    #     """on_init initializes all GameManager assets and resources.
     #     """
 
     # def on_render(self):

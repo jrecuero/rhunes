@@ -2,9 +2,17 @@
 """
 
 import sys
+import pygame
 
 from engine import (Component, DebugManager, DelegateManager, Engine, Entity,
                     GameManager, Log, Scene, SceneManager)
+
+
+class Box(Component):
+
+    def on_render(self):
+        pygame.draw.rect(self.engine.screen, (0, 0, 255), [50, 50, 150, 150], False)
+
 
 if __name__ == "__main__":
     # a_engine = Engine("main", 800, 400, the_end_condition=lambda self: self.frames == 2)
@@ -18,8 +26,8 @@ if __name__ == "__main__":
     a_engine.scene_manager.add_scene(Scene("Play Scene"))
     a_engine.scene_manager.add_scene(Scene("Game Over Scene"))
     a_engine.scene_manager.assign_active_scene()
-    a_player = Entity("Player")
-    a_player.add_component(Component("Body"))
+    a_player = a_engine.new_entity(Entity("Player"))
+    a_player.add_component(Box("Body"))
     a_engine.scene_manager.active_scene.scene.add_entity(a_player)
     a_engine.run()
     # sys.exit(0)

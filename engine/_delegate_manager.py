@@ -78,7 +78,7 @@ class DelegateManager(EObject):
         return a_delegate
 
     def deregister_callback_from_delegate(self, the_delegate_id, the_callback_id):
-        """deregister_callback_from_delegate unregisters the given callback
+        """deregister_callback_from_delegate deregister the given callback
         from the delegate.
         """
         Log.DelegateManager(self.name).DeregisterCallback(the_delegate_id, the_callback_id).call()

@@ -89,7 +89,7 @@ class Entity(EObject):
     def load_unloaded_components(self):
         """load_unloaded_components proceeds to load any unloaded component.
         """
-        # Log.Entity(self.name).LoadUnloadedComoponents().call()
+        # Log.Entity(self.name).LoadUnloadedComponents().call()
         a_unloaded_components = list()
         for a_component in self.unloaded_components:
             if not a_component.active:

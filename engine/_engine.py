@@ -2,10 +2,13 @@
 all application.
 """
 
+# import time
+import pygame
 from ._loggar import Log
+from ._eobject import EObject
 
 
-class Engine:
+class Engine(EObject):
     """Engine class is the main class that drives and handles all application.
     """
 
@@ -35,14 +38,11 @@ class Engine:
             the_width (int): screen width for the application.
             the_height (int): screen height for the application.
         """
+        super().__init__(the_name)
         if Engine.__instance is not None:
             raise Exception("Engine can be only one!")
         Engine.__instance = self
-        Log.Engine(the_name).New((the_width, the_height)).call()
-        self.name = the_name
-        self.width = the_width
-        self.height = the_height
-        self.active = False
+        Log.Engine(the_name).Size((the_width, the_height)).call()
         self.managers = {
             "cursor-manager": kwargs.get("the_cursor_manager", None),
             "debug-manager": kwargs.get("the_debug_manager", None),
@@ -54,8 +54,13 @@ class Engine:
             "scene-manager": kwargs.get("the_scene_manager", None),
             "sound-manager": kwargs.get("the_sound_manager", None), }
         self.frames = 0
-        self.state = "created"
         self.end_condition = kwargs.get("the_end_condition", None)
+        # pygame related attributes
+        self.screen = None
+        self.clock = None
+        self.width = the_width
+        self.height = the_height
+        self.title = kwargs.get("the_title", "Rhunes Engine")
 
     @property
     def active_managers(self):
@@ -216,30 +221,44 @@ class Engine:
         Log.Engine(self.name).DestroyEntity(the_entity.name).call()
         a_scene = the_entity.get_scene()
         a_scene.delete_entity(the_entity)
-        the_entity.set_active(False)
+        the_entity.active = False
         return True
+
+    def new_component(self, the_component):
+        """new_component creates a new component for the engine.
+        """
+        Log.Engine(self.name).NewComponent(the_component.name).call()
+        the_component.engine = self
+        
+    def new_entity(self, the_entity):
+        """new_entity creates a new entity for the engine.
+        """
+        Log.Engine(self.name).NewEntity(the_entity.name).call()
+        the_entity.engine = self
+        for a_child in the_entity.children:
+            self.new_entity(a_child)
+        for a_component in the_entity.components:
+            self.new_component(a_component)
+        return the_entity
 
     def on_after_update(self):
         """on_after_update calls all on_after_update methods for every manager.
         """
-        self.state = "on-after-update"
-        # Log.Engine(self.name).OnAfterUpdate(self.state).call()
+        super().on_after_update()
         for a_manager in self.active_managers:
             a_manager.on_after_update()
 
     def on_create(self):
         """on_create calls call on_create methods.
         """
-        self.state = "on-create"
-        Log.Engine(self.name).OnCreate(self.state).call()
+        super().on_create()
         for a_manager in self.active_managers:
             a_manager.on_create()
 
     def on_cleanup(self):
         """on_cleanup calls all graphical and none graphical resources.
         """
-        self.state = "on-cleanup"
-        Log.Engine(self.name).OnCleanUp(self.state).call()
+        super().on_cleanup()
         self.on_graphical_cleanup()
         for a_manager in self.active_managers:
             a_manager.on_cleanup()
@@ -247,24 +266,22 @@ class Engine:
     def on_end(self):
         """on_end ends the game engine.
         """
-        self.state = "on-end"
+        super().on_end()
         for a_manager in self.active_managers:
             a_manager.on_end()
-        Log.Engine(self.name).OnEnd(self.state).call()
+        Log.Engine(self.name).Ending(self.state).call()
 
     def on_frame_end(self):
         """on_frame_end calls all methods to run at the end of a tick frame.
         """
-        self.state = "on-frame-end"
-        # Log.Engine(self.name).OnFrameEnd(self.state).call()
+        super().on_frame_end()
         for a_manager in self.active_managers:
             a_manager.on_frame_end()
 
     def on_frame_start(self):
         """on_frame_start calls all methods to run at the start of a tick frame.
         """
-        self.state = "on-frame-start"
-        # Log.Engine(self.name).OnFrameStart(self.state).call()
+        super().on_frame_start()
         self.frames += 1
         for a_manager in self.active_managers:
             a_manager.on_frame_start()
@@ -272,21 +289,35 @@ class Engine:
     def on_graphical_cleanup(self):
         """on_graphical_cleanup cleans up all graphical resources.
         """
-        self.state = "on-graphical-cleanup"
-        Log.Engine(self.name).OnGraphicalCleanUp(self.state).call()
+        super().on_graphical_cleanup()
+        pygame.quit()
 
     def on_graphical_init(self):
         """on_graphical_init initialized all graphical resources.
         """
-        self.state = "on-graphical-init"
-        Log.Engine(self.name).OnGraphicalInit(self.state).call()
+        super().on_graphical_init()
+
+        # Initialize pygame
+        if pygame.get_sdl_version()[0] == 2:
+            pygame.mixer.pre_init(44100, 32, 2, 1024)
+        pygame.init()
+        if pygame.mixer and not pygame.mixer.get_init():
+            print("Warning, no sound")
+            pygame.mixer = None
+
+        self.screen = pygame.display.set_mode((self.width, self.height))
+        pygame.display.set_caption(self.title)
+
+        self.screen.fill((250, 250, 250))
+        pygame.display.flip()
+
+        self.clock = pygame.time.Clock()
 
     def on_init(self):
-        """on_init initalizes all engine graphical and none graphical
+        """on_init initializes all engine graphical and none graphical
         resources.
         """
-        self.state = "on-init"
-        Log.Engine(self.name).OnInit(self.state).call()
+        super().on_init()
         self.on_graphical_init()
         for a_manager in self.active_managers:
             a_manager.on_init()
@@ -294,17 +325,27 @@ class Engine:
     def on_run(self):
         """on_run proceeds to run the engine.
         """
-        self.state = "on-run"
-        Log.Engine(self.name).OnRun(self.state).call()
-        while self.active:
+        super().on_run()
+
+        while self.running:
+            self.clock.tick(30)
+
+            if not self.active:
+                continue
+
             self.on_frame_start()
 
             # process all graphical events.
+            for a_event in pygame.event.get():
+                if a_event.type == pygame.QUIT:
+                    self.running = False
 
             self.on_update()
             self.on_after_update()
 
+            self.screen.fill((250, 250, 250))
             self.on_render()
+            pygame.display.flip()
 
             self.on_frame_end()
 
@@ -315,8 +356,7 @@ class Engine:
     def on_render(self):
         """on_render calls all on_render methods for every manager.
         """
-        self.state = "on-render"
-        # Log.Engine(self.name).OnRender(self.state).call()
+        super().on_render()
         for a_manager in self.active_managers:
             a_manager.on_render()
 
@@ -324,8 +364,7 @@ class Engine:
         """on_start starts the engine. At this point all scenes and entities
         have been already registered to the engine.
         """
-        self.state = "on-start"
-        Log.Engine(self.name).OnStart(self.state).call()
+        super().on_start()
         self.active = True
         for a_manager in self.active_managers:
             a_manager.on_start()
@@ -333,8 +372,7 @@ class Engine:
     def on_update(self):
         """on_update calls all on_update methods for every manager.
         """
-        self.state = "on-update"
-        # Log.Engine(self.name).OnUpdate(self.state).call()
+        super().on_update()
         for a_manager in self.active_managers:
             a_manager.on_update()
 
@@ -345,5 +383,7 @@ class Engine:
         self.on_create()
         self.on_start()
         self.on_run()
+        # time.sleep(1)
+        Log.Engine(self.name).Exiting(self.state).call()
         self.on_cleanup()
         self.on_end()

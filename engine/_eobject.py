@@ -16,6 +16,7 @@ class EObject(IObject):
         Log.__getattr__(type(self).__name__)(self.name).New().call()
         self.engine = the_engine
         self.state = "created"
+        self.running = False
         self.cache = {}
 
     def get_cache(self, the_key):
@@ -93,6 +94,13 @@ class EObject(IObject):
         self.state = "on-cleanup"
         Log.__getattr__(type(self).__name__)(self.name).OnCleanUp(self.state).call()
 
+    def on_deactive(self):
+        """on_deactive calls all on_deactive methods.
+        """
+        self.active = False
+        self.state = "on-deactive"
+        Log.__getattr__(type(self).__name__)(self.name).OnDeactive(self.state).call()
+
     def on_destroy(self):
         """on_destroy calls all on_destroy methods
         """
@@ -100,16 +108,24 @@ class EObject(IObject):
         Log.__getattr__(type(self).__name__)(self.name).OnDestroy(self.state).call()
 
     def on_dump(self):
-        """on_dump dumps all scene entites in JSON format.
+        """on_dump dumps all scene entities in JSON format.
         """
         self.state = "on-dump"
         Log.__getattr__(type(self).__name__)(self.name).OnDump(self.state).call()
 
     def on_end(self):
-        """on_end ends instanve.
+        """on_end ends instance.
         """
         self.state = "on-end"
         Log.__getattr__(type(self).__name__)(self.name).OnEnd(self.state).call()
+
+    def on_exit(self):
+        """on_exit proceeds to exit the engine. This will cause the engine to ends.
+        In order to stop temporarely the engine, calls on_deactive.
+        """
+        self.running = False
+        self.state = "on-exit"
+        Log.__getattr__(type(self).__name__)(self.name).OnExit(self.state).call()
 
     def on_frame_end(self):
         """on_frame_end calls all methods to run at the end of a tick frame.
@@ -136,7 +152,7 @@ class EObject(IObject):
         Log.__getattr__(type(self).__name__)(self.name).OnGraphicalInit(self.state).call()
 
     def on_init(self):
-        """on_init initalizes all engine graphical and none graphical
+        """on_init initializes all engine graphical and none graphical
         resources.
         """
         self.state = "on-init"
@@ -152,6 +168,7 @@ class EObject(IObject):
     def on_run(self):
         """on_run proceeds to run the engine.
         """
+        self.running = True
         self.state = "on-run"
         Log.__getattr__(type(self).__name__)(self.name).OnRun(self.state).call()
 
@@ -183,7 +200,7 @@ class EObject(IObject):
         """on_unload is called all on_unload methods.
         """
         self.state = "on-unload"
-        Log.__getattr__(type(self).__name__)(self.name).OnUnlooad(self.state).call()
+        Log.__getattr__(type(self).__name__)(self.name).OnUnload(self.state).call()
 
     def on_update(self):
         """on_update calls all on_update methods.

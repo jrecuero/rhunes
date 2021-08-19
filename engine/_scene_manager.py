@@ -139,7 +139,7 @@ class SceneManager(EObject):
             self.active_scene.scene.on_frame_start()
 
     def on_init(self):
-        """on_init initalizes all SceneManager assets and resources.
+        """on_init initializes all SceneManager assets and resources.
         """
         super().on_init()
         if self.active_scene and self.active_scene.scene:
