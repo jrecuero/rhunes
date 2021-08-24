@@ -56,11 +56,14 @@ class Engine(EObject):
         self.frames = 0
         self.end_condition = kwargs.get("the_end_condition", None)
         # pygame related attributes
-        self.screen = None
         self.clock = None
         self.width = the_width
         self.height = the_height
         self.title = kwargs.get("the_title", "Rhunes Engine")
+        self.pygame_screen = None
+        self.pygame_events = None
+        self.pygame_key_pressed = None
+
 
     @property
     def active_managers(self):
@@ -305,10 +308,10 @@ class Engine(EObject):
             print("Warning, no sound")
             pygame.mixer = None
 
-        self.screen = pygame.display.set_mode((self.width, self.height))
+        self.pygame_screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption(self.title)
 
-        self.screen.fill((250, 250, 250))
+        self.pygame_screen.fill((250, 250, 250))
         pygame.display.flip()
 
         self.clock = pygame.time.Clock()
@@ -336,14 +339,17 @@ class Engine(EObject):
             self.on_frame_start()
 
             # process all graphical events.
-            for a_event in pygame.event.get():
+            self.pygame_events = pygame.event.get()
+            self.pygame_key_pressed = pygame.key.get_pressed()
+
+            for a_event in self.pygame_events:
                 if a_event.type == pygame.QUIT:
                     self.running = False
 
             self.on_update()
             self.on_after_update()
 
-            self.screen.fill((250, 250, 250))
+            self.pygame_screen.fill((250, 250, 250))
             self.on_render()
             pygame.display.flip()
 

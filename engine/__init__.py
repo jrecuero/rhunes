@@ -1,4 +1,4 @@
-"""__init__.py pyengine module.
+"""__init__.py pygame engine module.
 """
 
 from ._component import Component
@@ -10,6 +10,7 @@ from ._game_manager import GameManager
 from ._loggar import Log
 from ._scene import Scene
 from ._scene_manager import SceneManager
+from ._transform import Transform
 
 __all__ = [
     "Component",
@@ -21,4 +22,5 @@ __all__ = [
     "Log",
     "Scene",
     "SceneManager",
+    "Transform",
 ]

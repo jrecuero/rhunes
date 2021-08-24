@@ -1,6 +1,7 @@
 """_scene.py contais the Scene base class, used for any scene in the game.
 """
 
+import pygame
 from ._eobject import EObject
 from ._loggar import Log
 
@@ -87,6 +88,8 @@ class Scene(EObject):
             a_entity.on_unload()
             a_entity.on_destroy()
         self.to_delete_entities = list()
+        for a_entity in self.loaded_entities:
+            a_entity.on_after_update()
 
     def on_destroy(self):
         """on_destroy calls all methods to clean up the scene.

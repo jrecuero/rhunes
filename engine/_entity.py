@@ -3,6 +3,7 @@
 
 from ._eobject import EObject
 from ._loggar import Log
+from ._transform import Transform
 
 
 class Entity(EObject):
@@ -13,16 +14,16 @@ class Entity(EObject):
         """__init__ initializes the Entity instance.
         """
         super().__init__(the_name, the_engine, **kwargs)
-        self.layer = kwargs.get("layer", "middle")
-        self.parent = kwargs.get("parent", None)
+        self.layer = kwargs.get("the_layer", "middle")
+        self.parent = kwargs.get("the_parent", None)
         self.children = list()
-        self.scene = kwargs.get("scene", None)
-        self.transform = kwargs.get("transform", None)
+        self.scene = kwargs.get("the_scene", None)
+        self.transform = kwargs.get("the_transform", Transform())
         self.components = list()
         self.loaded_components = list()
         self.unloaded_components = list()
-        self.die_on_collision = kwargs.get("die_on_collision", False)
-        self.die_on_out_of_bounds = kwargs.get("die_on_out_of_bounds", False)
+        self.die_on_collision = kwargs.get("the_die_on_collision", False)
+        self.die_on_out_of_bounds = kwargs.get("the_die_on_out_of_bounds", False)
 
     def add_child(self, the_child):
         """add_child adds a new child entity.
@@ -99,6 +100,11 @@ class Entity(EObject):
             self.loaded_components.append(a_component)
         self.unloaded_components = a_unloaded_components
         return True
+
+    def on_after_update(self):
+        super().on_after_update()
+        for a_component in self.loaded_components:
+            a_component.on_after_update()
 
     def on_destroy(self):
         """on_destroy calls all methods to clean up the entity.

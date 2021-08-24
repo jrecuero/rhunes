@@ -108,9 +108,12 @@ class SceneManager(EObject):
                 return a_scene_index
         return None
 
-    # def on_after_update(self):
-    #     """on_after_update calls all on_after_update methods for every asset..
-    #     """
+    def on_after_update(self):
+        """on_after_update calls all on_after_update methods for every asset..
+        """
+        super().on_after_update()
+        if self.active_scene and self.active_scene.scene:
+            self.active_scene.scene.on_after_update()
 
     # def on_cleanup(self):
     #     """on_cleanup cleans up all assets.

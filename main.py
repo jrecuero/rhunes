@@ -5,8 +5,8 @@ import sys
 import pygame
 
 from engine import (Component, DebugManager, DelegateManager, Engine, Entity,
-                    GameManager, Log, Scene, SceneManager)
-from engine.assets.components import Box
+                    GameManager, Log, Scene, SceneManager, Transform)
+from engine.assets.components import Box, KeyController
 
 
 # class Box(Component):
@@ -28,7 +28,10 @@ if __name__ == "__main__":
     a_engine.scene_manager.add_scene(Scene("Game Over Scene"))
     a_engine.scene_manager.assign_active_scene()
     a_player = a_engine.new_entity(Entity("Player"))
-    a_player.add_component(Box("Body", the_color='blue', the_rect=pygame.Rect(50, 50, 100, 100)))
+    a_player.transform = Transform(the_position=pygame.Vector2(50, 50), the_dim=pygame.Vector2(100, 100))
+    # a_player.add_component(Box("Body", the_color='blue', the_rect=pygame.Rect(50, 50, 100, 100)))
+    a_player.add_component(KeyController("ArrowController"))
+    a_player.add_component(Box("Body", the_color='blue'))
     a_engine.scene_manager.active_scene.scene.add_entity(a_player)
     a_engine.run()
     # sys.exit(0)
