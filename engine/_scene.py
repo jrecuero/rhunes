@@ -54,6 +54,7 @@ class Scene(EObject):
                 a_unloaded_entities.append(a_entity)
                 continue
             a_entity.on_load()
+            a_entity.on_start()
             self.loaded_entities.append(a_entity)
             layer = a_entity.layer
             self.layers[layer].append(a_entity)
@@ -159,8 +160,8 @@ class Scene(EObject):
         """on_start calls all loaded entities on_start methods.
         """
         super().on_start()
-        for a_entity in self.loaded_entities:
-            a_entity.on_start()
+        # for a_entity in self.loaded_entities:
+        #     a_entity.on_start()
 
     def on_swap_back(self):
         """on_swap_back is called when scene is swap back.

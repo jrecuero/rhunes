@@ -108,6 +108,12 @@ class SceneManager(EObject):
                 return a_scene_index
         return None
 
+    def is_active_scene(self, the_scene_id):
+        """is_active_scene returns if the given scene id belongs to the
+        active scene.
+        """
+        return self.active_scene.id == the_scene_id
+
     def on_after_update(self):
         """on_after_update calls all on_after_update methods for every asset..
         """

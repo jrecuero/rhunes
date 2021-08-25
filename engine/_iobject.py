@@ -15,7 +15,7 @@ class IObject:
         Args:
             the_name (str): IObject instance name.
         """
-        self.id = get_ider()
+        self.id = get_ider().next()
         self.name = the_name
         self.loaded = kwargs.get("loaded", False)
         self.started = kwargs.get("started", False)

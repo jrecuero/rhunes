@@ -13,6 +13,9 @@ class Box(Component):
         self.rect = kwargs.get('the_rect', None)
         self.border = kwargs.get('the_border', 0)
 
+    def callback_out_of_bounds(self, **kwargs):
+        print("callback with {}\n".format(kwargs))
+
     def on_after_update(self):
         self.rect = self.entity.transform.get_rect()
 
@@ -22,3 +25,7 @@ class Box(Component):
 
     def on_render(self):
         pygame.draw.rect(self.engine.pygame_screen, self.color, self.rect, self.border)
+
+    def on_start(self):
+        a_component = self.entity.get_component("OutOfBounds")
+        self.engine.delegate_manager.register_callback_to_delegate(self, a_component.delegate, self.callback_out_of_bounds)

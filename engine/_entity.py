@@ -99,6 +99,7 @@ class Entity(EObject):
             a_component.on_load()
             self.loaded_components.append(a_component)
         self.unloaded_components = a_unloaded_components
+        self.on_start()
         return True
 
     def on_after_update(self):

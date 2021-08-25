@@ -6,7 +6,7 @@ import pygame
 
 from engine import (Component, DebugManager, DelegateManager, Engine, Entity,
                     GameManager, Log, Scene, SceneManager, Transform)
-from engine.assets.components import Box, KeyController
+from engine.assets.components import Box, KeyController, OutOfBounds
 
 
 # class Box(Component):
@@ -32,6 +32,7 @@ if __name__ == "__main__":
     # a_player.add_component(Box("Body", the_color='blue', the_rect=pygame.Rect(50, 50, 100, 100)))
     a_player.add_component(KeyController("ArrowController"))
     a_player.add_component(Box("Body", the_color='blue'))
+    a_player.add_component(OutOfBounds("OutOfBounds", the_bounce=True))
     a_engine.scene_manager.active_scene.scene.add_entity(a_player)
     a_engine.run()
     # sys.exit(0)

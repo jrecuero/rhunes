@@ -108,5 +108,6 @@ Untitled.ipynb
 
 # visual studio code
 .vscode
+*.code-workspace
 
 .mypy_cache/

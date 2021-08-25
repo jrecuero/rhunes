@@ -25,6 +25,13 @@ class Callback(IObject):
 
     def __init__(self, the_name, the_source, the_entity, the_component, the_delegate, the_signature):
         """__init__ initializes a Callback instance.
+
+        source: component where callback belongs
+        entity: entity of the delegate component.
+        component: delegate component.
+        delegate: delegate where callback is registered.
+        signature: callback signature.
+        kwargs: parameters to be passed to the callback
         """
         super().__init__(the_name)
         self.callback_id = None
@@ -135,7 +142,9 @@ class DelegateManager(EObject):
         delegate.
         """
         Log.DelegateManager(self.name).RegisterCallback(the_delegate.name).call()
-        a_callback = Callback("", the_source, None, None, the_delegate, the_signature)
+        a_component = the_delegate.source
+        a_callback_name = "{}/{}".format(the_source.name, a_component.name)
+        a_callback = Callback(a_callback_name, the_source, a_component.entity, a_component, the_delegate, the_signature)
         a_callback.callback_id = a_callback.id
         self.callbacks.setdefault(the_delegate.id, []).append(a_callback)
         return a_callback.callback_id, True
@@ -153,12 +162,13 @@ class DelegateManager(EObject):
         """trigger_delegate_for calls all callbacks registered to the given
         delegate if callback entity is in the lis of entities given.
         """
+        Log.DelegateManager(self.name).TriggerDelegateFor(the_delegate_id).call()
         for a_callback in self.callbacks.get(the_delegate_id, []):
             # Check if the entity for the component in the callback belongs to
             # the active scene.
             if not self.get_scene_manager().is_active_scene(a_callback.component.entity.scene.id):
                 continue
-            if a_callback.component.entity not in the_entities:
+            if the_entities is not None and a_callback.component.entity not in the_entities:
                 continue
             if the_now:
                 a_callback.signature(**kwargs)
