@@ -70,6 +70,14 @@ class Entity(EObject):
             return True
         return False
 
+    def get_collider(self):
+        """get_collider returns the collider component.
+        """
+        for a_component in self.loaded_components:
+            if a_component.collider:
+                return a_component.get_collider_rect()
+        return None
+
     def get_component(self, the_component_klass):
         """get_component returns the given component by the class.
         """
@@ -87,19 +95,33 @@ class Entity(EObject):
             return None
         return a_component.delegate
 
+    def has_collider(self):
+        """has_collider returns if the entity has a collider component.
+        """
+        for a_component in self.components:
+            if a_component.collider:
+                return True
+        return False
+
     def load_unloaded_components(self):
         """load_unloaded_components proceeds to load any unloaded component.
         """
         # Log.Entity(self.name).LoadUnloadedComponents().call()
         a_unloaded_components = list()
+        a_loaded = False
         for a_component in self.unloaded_components:
             if not a_component.active:
                 a_unloaded_components.append(a_component)
                 continue
             a_component.on_load()
             self.loaded_components.append(a_component)
+            a_loaded = True
         self.unloaded_components = a_unloaded_components
-        self.on_start()
+        # if there was at least one component being loaded, on_start for that
+        #  or those component has to be called.
+        if a_loaded:
+            for a_component in [x for x in self.loaded_components if x.active]:
+                a_component.on_start()
         return True
 
     def on_after_update(self):

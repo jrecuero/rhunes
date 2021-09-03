@@ -86,7 +86,7 @@ class DebugManager(EObject):
         app.api_kill()
 
     def on_init(self):
-        """on_init initalizes test debugger and start thread and
+        """on_init initializes test debugger and start thread and
         flask app.
         """
         super().on_init()

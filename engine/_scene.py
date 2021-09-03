@@ -10,6 +10,11 @@ class Scene(EObject):
     """Scene class identifies a scene.
     """
     LAYERS = ["background", "middle", "top"]
+    SCENE_HANDLER_ENTITY_NAME = "SceneHandlerEntity"
+    SCENE_HANDLER_COMPONENT_NAME = "SceneHandlerComponent"
+    ON_COLLISION_EVENT_NAME = "on-collision-event"
+    ON_DESTROY_EVENT_NAME = "on-destroy-event"
+    ON_LOAD_EVENT_NAME = "on-load_event"    
 
     def __init__(self, the_name, the_engine=None, **kwargs):
         """__init__ initialized the Scene instance.
@@ -44,10 +49,27 @@ class Scene(EObject):
         """check_collisions checks collisions between all entities in the
         scene.
         """
+        for i in range(len(self.collision_collection)):
+            for j in range(i + 1, len(self.collision_collection)):
+                i_entity = self.collision_collection[i]
+                i_collider = i_entity.get_collider()
+                if i_collider is None:
+                    continue
+                j_entity = self.collision_collection[j]
+                j_collider = j_entity.get_collider()
+                if j_collider is None:
+                    continue
+                if i_collider.colliderect(j_collider):
+                    a_scene_entity = self.lookup_by_name(self.entities, self.SCENE_HANDLER_ENTITY_NAME)
+                    a_scene_component = a_scene_entity.lookup_by_name(a_scene_entity.components, self.SCENE_HANDLER_COMPONENT_NAME)
+                    # self.engine.delegate_manager.trigger_delegate(self.engine.delegate_manager.on_collision_delegate.id, True, the_one_entity=i_entity, the_other_entity=j_entity)
+                    self.engine.delegate_manager.trigger_delegate(a_scene_component.get_delegate(self.ON_COLLISION_EVENT_NAME).id, True, the_one_entity=i_entity, the_other_entity=j_entity)
+                    # print("collision {} and {}\n".format(self.collision_collection[i].name, self.collision_collection[j].name))
 
     def load_unloaded_entities(self):
         """load_unloaded_entities proceeds to load any unloaded entity.
         """
+        # Log.Scene(self.name).LoadUnloadedEntities().call()
         a_unloaded_entities = list()
         for a_entity in self.unloaded_entities:
             if not a_entity.active:
@@ -58,12 +80,12 @@ class Scene(EObject):
             self.loaded_entities.append(a_entity)
             layer = a_entity.layer
             self.layers[layer].append(a_entity)
-            for a_component in a_entity.components:
-                if not a_component.active:
-                    continue
-                # TODO: check component collision collider
+            if a_entity.has_collider:
+                self.collision_collection.append(a_entity)
 
             # TODO: trigger load delegate
+
+            print([x.name for x in self.collision_collection])
 
         self.unloaded_entities = a_unloaded_entities
 
@@ -202,6 +224,7 @@ class Scene(EObject):
         super().on_update()
         for a_entity in self.loaded_entities:
             a_entity.on_update()
+        self.check_collisions()
 
     def remove_entity(self, the_entity):
         """remove_entity removes the given entity from the scene.

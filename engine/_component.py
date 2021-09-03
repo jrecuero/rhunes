@@ -15,29 +15,41 @@ class Component(EObject):
         """__init__ initializes the Component instance.
         """
         super().__init__(the_name, the_engine, **kwargs)
-        self.entity = kwargs.get("entity", None)
-        self.delegate = kwargs.get("delegate", None)
+        self.entity = kwargs.get("the_entity", None)
+        self.delegates = kwargs.get("the_delegates", {})
+        # any collider component has to implement get_collider_box or
+        # get_collider_circle methods.
+        self.collider = False
         self.callbacks = []
-        self.remove_on_destroy = kwargs.get("remove_on_destroy", True)
+        self.remove_on_destroy = kwargs.get("the_remove_on_destroy", True)
 
-    def add_delegate_to_callback(self, the_delegate, the_entity, the_component, the_signature):
-        """add_delegate_to_callback adds a new delegate that component should callback.
-        """
-        Log.Component(self.name).AddDelegateToCallback(the_delegate, the_entity, the_component).call()
-        a_callback = Callback("component-callback", self, the_entity, the_component, the_delegate, the_signature)
-        self.callbacks.append(a_callback)
-        return self
+    # def add_delegate_to_callback(self, the_delegate, the_entity, the_component, the_signature):
+    #     """add_delegate_to_callback adds a new delegate that component should callback.
+    #     """
+    #     Log.Component(self.name).AddDelegateToCallback(the_delegate, the_entity, the_component).call()
+    #     a_callback = Callback("component-callback", self, the_entity, the_component, the_delegate, the_signature)
+    #     self.callbacks.append(a_callback)
+    #     return self
 
-    def default_add_delegate_to_callback(self):
-        """default_add_delegate_to_callback adds default delegate to callback
-        for the component.
-        """
+    # def default_add_delegate_to_callback(self):
+    #     """default_add_delegate_to_callback adds default delegate to callback
+    #     for the component.
+    #     """
 
     @property
     def klass(self):
         """klass returns component class name.
         """
         return type(self).__name__
+
+    def get_delegate(self, the_delegate_name=None):
+        """get_delegate retrieves the component delegate with the given name.
+        If the_delegate_name is not provided, it assumes there is only one
+        delegate in the component and that is the one being retrieved.
+        """
+        if the_delegate_name is None:
+            return list(self.delegates.values())[0] if len(self.delegates) == 1 else None
+        return self.delegates.get(the_delegate_name, None)
 
     def on_active(self):
         """on_active is called every time the component is set to active.
@@ -58,8 +70,8 @@ class Component(EObject):
         for a_callback in self.callbacks:
             self.get_delegate_manager().deregister_from_delegate(a_callback.callback)
             a_callback.delegate = None
-        if self.delegate:
-            self.get_delegate_manager().delete_delegate(self.delegate)
+        for a_delegate in self.delegates.values():
+            self.get_delegate_manager().delete_delegate(a_delegate)
         self.callbacks = []
         self.delegate = None
         self.loaded = False
@@ -112,17 +124,17 @@ class Component(EObject):
         super().on_start()
         if self.started:
             return
-        for a_callback in self.callbacks:
-            a_delegate = a_callback.delegate
-            if a_delegate is None:
-                a_entity = a_callback.entity if a_callback.entity else self.entity
-                a_component = a_entity.get_component(a_callback.component)
-                if a_component and a_component.delegate:
-                    a_callback.delegate = a_delegate
-            else:
-                a_callback_id, a_ok = self.get_delegate_manager().register_callback_to_delegate(self, a_delegate, a_callback.signature)
-                if a_ok:
-                    a_callback.callback_id = a_callback_id
+        # for a_callback in self.callbacks:
+        #     a_delegate = a_callback.delegate
+        #     if a_delegate is None:
+        #         a_entity = a_callback.entity if a_callback.entity else self.entity
+        #         a_component = a_entity.get_component(a_callback.component)
+        #         if a_component and a_component.delegate:
+        #             a_callback.delegate = a_delegate
+        #     else:
+        #         a_callback_id, a_ok = self.get_delegate_manager().register_callback_to_delegate(self, a_delegate, a_callback.signature)
+        #         if a_ok:
+        #             a_callback.callback_id = a_callback_id
         self.started = True
 
     def on_unload(self):
@@ -132,15 +144,15 @@ class Component(EObject):
         callbacks.
         """
         super().on_unload()
-        for a_callback in self.callbacks:
-            self.get_delegate_manager().deregister_from_delegate(a_callback.callback_id)
-            # Callback is created based on delegates for those belonging to
-            # the DelegateManager. Those are unchanged and delegate does not
-            # to be cleared.
-            if a_callback.delegate and a_callback.delegate.id not in self.get_delegate_manager().defaults_id:
-                a_callback.delegate = None
-        if self.delegate:
-            self.get_delegate_manager().delete_delegate(self.delegate)
+        # for a_callback in self.callbacks:
+        #     self.get_delegate_manager().deregister_from_delegate(a_callback.callback_id)
+        #     # Callback is created based on delegates for those belonging to
+        #     # the DelegateManager. Those are unchanged and delegate does not
+        #     # to be cleared.
+        #     if a_callback.delegate and a_callback.delegate.id not in self.get_delegate_manager().defaults_id:
+        #         a_callback.delegate = None
+        for a_delegate in self.delegates.values():
+            self.get_delegate_manager().delete_delegate(a_delegate)
         self.loaded = False
         self.started = False
 

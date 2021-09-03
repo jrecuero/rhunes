@@ -22,10 +22,14 @@ class OutOfBounds(Component):
         self.bounce = kwargs.get("the_bounce", False)
 
     def on_load(self):
+        """on_load is called all on_load methods.
+        """
         super().on_load()
-        self.delegate = self.engine.delegate_manager.create_delegate(self, self.OUT_OF_BOUNDS_EVENT_NAME)
+        self.delegates[self.OUT_OF_BOUNDS_EVENT_NAME] = self.engine.delegate_manager.create_delegate(self, self.OUT_OF_BOUNDS_EVENT_NAME)
 
     def on_update(self):
+        """on_update calls all on_update methods.
+        """
         super().on_update()
         a_width = self.engine.width
         a_height = self.engine.height
@@ -41,10 +45,10 @@ class OutOfBounds(Component):
             test_top = (a_rect.y + a_rect.h) < 0
             test_down = a_rect.y > a_height
         if test_left:
-            self.engine.delegate_manager.trigger_delegate(self.delegate.id, True, the_entity=self.entity, the_location="left")
+            self.engine.delegate_manager.trigger_delegate(self.delegates[self.OUT_OF_BOUNDS_EVENT_NAME].id, True, the_entity=self.entity, the_location="left")
         if test_right:
-            self.engine.delegate_manager.trigger_delegate(self.delegate.id, True, the_entity=self.entity, the_location="right")
+            self.engine.delegate_manager.trigger_delegate(self.delegates[self.OUT_OF_BOUNDS_EVENT_NAME].id, True, the_entity=self.entity, the_location="right")
         if test_top:
-            self.engine.delegate_manager.trigger_delegate(self.delegate.id, True, the_entity=self.entity, the_location="top")
+            self.engine.delegate_manager.trigger_delegate(self.delegates[self.OUT_OF_BOUNDS_EVENT_NAME].id, True, the_entity=self.entity, the_location="top")
         if test_down:
-            self.engine.delegate_manager.trigger_delegate(self.delegate.id, True, the_entity=self.entity, the_location="down")
+            self.engine.delegate_manager.trigger_delegate(self.delegates[self.OUT_OF_BOUNDS_EVENT_NAME].id, True, the_entity=self.entity, the_location="down")
