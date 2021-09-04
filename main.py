@@ -7,7 +7,7 @@ from pygame.constants import K_RIGHT
 
 from engine import (Component, DebugManager, DelegateManager, Engine, Entity,
                     GameManager, Log, Scene, SceneManager, Transform)
-from engine.assets.components import Box, Collider2D, KeyController, MoveTo, SceneHandler, OutOfBounds
+from engine.assets.components import Box, Collider2D, KeyController, MoveTo, SceneHandlerComponent, OutOfBounds
 
 
 # class Box(Component):
@@ -30,12 +30,12 @@ def move_to_keyboard_callback(self):
 def move_to_out_of_bounds_callback(self):
     def _move_to_out_of_bounds_callback(the_entity, the_location):
         self.speed *= -1
-        pass
     return _move_to_out_of_bounds_callback
 
 def move_to_on_collision_callback(self):
     def _move_to_on_collision_callback(the_one_entity, the_other_entity):
-        print("collision callback between {} and {}".format(the_one_entity.name, the_other_entity.name))
+        self.speed *= -1
+        # print("collision callback between {} and {}".format(the_one_entity.name, the_other_entity.name))
     return _move_to_on_collision_callback
 
 if __name__ == "__main__":
@@ -60,7 +60,8 @@ if __name__ == "__main__":
     a_behavior = {
         "component:KeyController": move_to_keyboard_callback,
         "component:OutOfBounds": move_to_out_of_bounds_callback,
-        "scene:{}:on-collision-event".format(Scene.SCENE_HANDLER_ENTITY_NAME): move_to_on_collision_callback,
+        # "entity:{}:{}:{}".format(Scene.SCENE_HANDLER_ENTITY_NAME, Scene.SCENE_HANDLER_COMPONENT_NAME, Scene.ON_COLLISION_EVENT_NAME): move_to_on_collision_callback,
+        "scene:{}".format(Scene.ON_COLLISION_EVENT_NAME): move_to_on_collision_callback,
         # "KeyController": lambda self : lambda the_key : print(self.speed.x, self.speed.y, the_key),
             # pygame.K_UP: pygame.Vector2(0, -2), 
             # pygame.K_DOWN: pygame.Vector2(0, 2), 
@@ -74,7 +75,7 @@ if __name__ == "__main__":
     a_rock.add_component(Box("Rock/Body", the_color="red"))
     a_rock.add_component(Collider2D("Rock/Collider"))
     a_scene_handler = a_engine.new_entity(Entity(Scene.SCENE_HANDLER_ENTITY_NAME))
-    a_scene_handler.add_component(SceneHandler(Scene.SCENE_HANDLER_COMPONENT_NAME))
+    a_scene_handler.add_component(SceneHandlerComponent(Scene.SCENE_HANDLER_COMPONENT_NAME))
     a_engine.scene_manager.active_scene.scene.add_entity(a_scene_handler)
     a_engine.scene_manager.active_scene.scene.add_entity(a_player)
     a_engine.scene_manager.active_scene.scene.add_entity(a_rock)

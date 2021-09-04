@@ -5,8 +5,8 @@ from ..._component import Component
 from ..._scene import Scene
 
 
-class SceneHandler(Component):
-    """SceneHandler class implements scene component.
+class SceneHandlerComponent(Component):
+    """SceneHandlerComponent class implements scene component.
     """
 
     # ON_COLLISION_EVENT_NAME = "on-collision-event"

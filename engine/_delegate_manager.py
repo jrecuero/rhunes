@@ -10,12 +10,12 @@ class Delegate(IObject):
     """Delegate class.
     """
 
-    def __init__(self, the_name, the_source, the_event_name):
+    def __init__(self, the_name, the_component_source, the_event_name):
         """__init__ initializes a Delegate instance.
         """
         super().__init__(the_name)
         Log.Delegate(self.name).New().call()
-        self.source = the_source
+        self.component_source = the_component_source
         self.event_name = the_event_name
 
 
@@ -23,10 +23,10 @@ class Callback(IObject):
     """Callback class.
     """
 
-    def __init__(self, the_name, the_source, the_entity, the_component, the_delegate, the_signature):
+    def __init__(self, the_name, the_component_to_register, the_entity, the_component, the_delegate, the_signature):
         """__init__ initializes a Callback instance.
 
-        source: component where callback belongs
+        component_to_register: component where callback belongs
         entity: entity of the delegate component.
         component: delegate component.
         delegate: delegate where callback is registered.
@@ -35,7 +35,7 @@ class Callback(IObject):
         """
         super().__init__(the_name)
         self.callback_id = None
-        self.source = the_source
+        self.component_to_register = the_component_to_register
         self.entity = the_entity
         self.component = the_component
         self.delegate = the_delegate
@@ -46,9 +46,6 @@ class Callback(IObject):
 class DelegateManager(EObject):
     """DelegateManager class.
     """
-    ON_COLLISION_EVENT_NAME = "on-collision-event"
-    ON_DESTROY_EVENT_NAME = "on-destroy-event"
-    ON_LOAD_EVENT_NAME = "on-load_event"
 
     def __init__(self, the_name, the_engine=None):
         """__init__ initializes a DelegateManager instance.
@@ -56,24 +53,16 @@ class DelegateManager(EObject):
         super().__init__(the_name, the_engine)
         self.delegates = {}     # [delegate_id]delegate
         self.callbacks = {}     # [delegate_id]list(callback)
-        self.defaults = {}
         self.to_be_called = []
 
-    def create_delegate(self, the_source, the_event_name):
+    def create_delegate(self, the_component_source, the_event_name):
         """create_delegate creates and adds a new Delegate instance to the
         DelegateManager.
         """
         Log.DelegateManager(self.name).CreateDelegate(the_event_name).call()
-        a_delegate = Delegate("{}/{}".format(self.name, the_event_name), the_source, the_event_name)
+        a_delegate = Delegate("{}/{}".format(self.name, the_event_name), the_component_source, the_event_name)
         self.delegates[a_delegate.id] = a_delegate
         return a_delegate
-
-    @property
-    def defaults_id(self):
-        """defaults_id property returns a list with all DelegateManager defaults
-        delegates id's.
-        """
-        return [x.id for x in self.defaults.values()]
 
     def delete_delegate(self, the_delegate_id):
         """delete_delegate deletes the given delegate from the DelegateManager.
@@ -95,34 +84,11 @@ class DelegateManager(EObject):
                 return True
         return False
 
-    @property
-    def on_collision_delegate(self):
-        """on_collision_delegate returns the default on_collision event
-        delegate.
-        """
-        return self.defaults.get(self.ON_COLLISION_EVENT_NAME, None)
-
-    @property
-    def on_destroy_delegate(self):
-        """on_destroy_delegate returns the default on_destroy event
-        delegate.
-        """
-        return self.defaults.get(self.ON_DESTROY_EVENT_NAME, None)
-
     def on_init(self):
         """on_init initializes all DelegateManager resources.
         """
         super().on_init()
-        self.defaults[self.ON_COLLISION_EVENT_NAME] = self.create_delegate(self, self.ON_COLLISION_EVENT_NAME)
-        self.defaults[self.ON_DESTROY_EVENT_NAME] = self.create_delegate(self, self.ON_DESTROY_EVENT_NAME)
-        self.defaults[self.ON_LOAD_EVENT_NAME] = self.create_delegate(self, self.ON_LOAD_EVENT_NAME)
         return True
-
-    @property
-    def on_load_delegate(self):
-        """on_load_delegate returns the default on_load event delegate.
-        """
-        return self.defaults.get(self.ON_LOAD_EVENT_NAME, None)
 
     # def on_start(self):
     #     """on_start initializes all DelegateManager resources.
@@ -137,14 +103,14 @@ class DelegateManager(EObject):
         for a_callback in self.to_be_called:
             a_callback.signature(**a_callback.kwargs)
 
-    def register_callback_to_delegate(self, the_source, the_delegate, the_signature):
+    def register_callback_to_delegate(self, the_component_to_register, the_delegate, the_signature):
         """register_callback_to_delegate registers a new callback to the given
         delegate.
         """
         Log.DelegateManager(self.name).RegisterCallback(the_delegate.name).call()
-        a_component = the_delegate.source
-        a_callback_name = "{}/{}".format(the_source.name, a_component.name)
-        a_callback = Callback(a_callback_name, the_source, a_component.entity, a_component, the_delegate, the_signature)
+        a_component = the_delegate.component_source
+        a_callback_name = "{}/{}".format(the_component_to_register.name, a_component.name)
+        a_callback = Callback(a_callback_name, the_component_to_register, a_component.entity, a_component, the_delegate, the_signature)
         a_callback.callback_id = a_callback.id
         self.callbacks.setdefault(the_delegate.id, []).append(a_callback)
         return a_callback.callback_id, True
@@ -174,7 +140,7 @@ class DelegateManager(EObject):
                 a_callback.signature(**kwargs)
                 return
             a_store_callback = Callback(a_callback.name,
-                                        a_callback.source,
+                                        a_callback.component_to_register,
                                         a_callback.entity,
                                         a_callback.component,
                                         a_callback.delegate,
